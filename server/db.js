@@ -17,7 +17,8 @@ const productSchema = mongoose.Schema ({
   default_price: { type: String },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
-  features: [featuresSchema]
+  features: [featuresSchema],
+  related: [{ type: Number }]
 });
 
 
@@ -50,6 +51,16 @@ const styleSchema = mongoose.Schema ({
 });
 
 
+const cartSchema = mongoose.Schema ({
+  user_id: { type: Number, unique: true},
+  sku_id: { type: Number },
+  count: { type: String }
+});
+
+
 const Product = mongoose.model('Product', productSchema);
 const Style = mongoose.model('Style', styleSchema);
+const Cart = mongoose.model('Cart', cartSchema);
+
+module.exports = { Product, Style, Cart };
 
