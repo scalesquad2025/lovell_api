@@ -10,13 +10,14 @@ const seedProduct = () => {
   var csvData = [];
   var batchSize = 10;
   var count = 0;
-  fs.createReadStream(productFile)
-    .pipe(parse({delimiter: ',' , columns: true}))
+  const stream = fs.createReadStream(productFile)
+    .pipe(parse({delimiter: ',', columns: true}))
     .on('data', function(row) {
       console.log(row);
       csvData.push(row);
       count++;
       if (count === 10) {
+        stream.pause();
         Product.insertMany(csvData)
           .then(() => {
             console.log('pilot inserted');
