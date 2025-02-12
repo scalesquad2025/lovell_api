@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 
-mongoose.connect('mongodb://localhost/sdc');
+mongoose.connect(process.env.MONGODB_URI);
+mongoose.connection.on('error', (err) => console.error('mongoose failed: ', err));
 
 const featuresSchema = mongoose.Schema ({
   feature: { type: String },
@@ -33,14 +35,14 @@ const skusSchema = mongoose.Schema ({
 })
 
 const styleSchema = mongoose.Schema ({
-  product_id: { type: Schema.Types.ObjectId, ref: 'Product' },
+  product_id: { type: Number, ref: 'Product' },
   results: [
     {
       style_id: { type: Number, unique: true },
       name: { type: String },
       original_price: { type: String },
       sale_price: { type: String },
-      default?: { type: Boolean, default: false },
+      default_style: { type: Boolean, default: false },
       photos: [photosSchema],
       skus: {
         type: Map,
