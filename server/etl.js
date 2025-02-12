@@ -12,7 +12,12 @@ const seedProduct = () => {
   var count = 0;
 
   const stream = fs.createReadStream(productFile)
-    .pipe(parse({delimiter: ',', columns: true}))
+    .pipe(parse({
+      delimiter: ',',
+      columns: true,
+      relax_quotes: true,
+      relax_column_count: true
+    }))
     .on('data', (row) => {
       csvData.push({
         id: parseInt(row.id),
@@ -53,7 +58,12 @@ const seedRelated = () => {
   var count = 0;
 
   const stream = fs.createReadStream(relatedFile)
-    .pipe(parse({delimiter: ',', columns: true}))
+    .pipe(parse({
+      delimiter: ',',
+      columns: true,
+      relax_quotes: true,
+      relax_column_count: true
+    }))
     .on('data', (row) => {
       csvData.push({
         id: parseInt(row.id),
@@ -91,7 +101,12 @@ const seedFeatures = () => {
   var count = 0;
 
   const stream = fs.createReadStream(featuresFile)
-    .pipe(parse({delimiter: ',', columns: true}))
+    .pipe(parse({
+      delimiter: ',',
+      columns: true,
+      relax_quotes: true,
+      relax_column_count: true
+    }))
     .on('data', (row) => {
       csvData.push({
         id: parseInt(row.id),
@@ -130,11 +145,16 @@ const seedPhotos = () => {
   var count = 0;
 
   const stream = fs.createReadStream(photosFile)
-    .pipe(parse({delimiter: ',', columns: true}))
+    .pipe(parse({
+      delimiter: ',',
+      columns: true,
+      relax_quotes: true,
+      relax_column_count: true
+    }))
     .on('data', (row) => {
       csvData.push({
         id: parseInt(row.id),
-        style_id: row.styleId,
+        style_id: parseInt(row.styleId),
         thumbnail_url: row.thumbnail_url,
         url: row.url
       });
@@ -161,6 +181,140 @@ const seedPhotos = () => {
     });
 };
 
+const seedSkus = () => {
+
+  const skusFile = path.join(__dirname, '../data/skus.csv');
+  var csvData = [];
+  var batchSize = 10;
+  var count = 0;
+
+  const stream = fs.createReadStream(skusFile)
+    .pipe(parse({
+      delimiter: ',',
+      columns: true,
+      relax_quotes: true,
+      relax_column_count: true
+    }))
+    .on('data', (row) => {
+      csvData.push({
+        id: parseInt(row.id),
+        style_id: parseInt(row.styleId),
+        quantity: row.quantity,
+        size: row.size
+      });
+
+      count++;
+
+      if (count === 10) {
+        stream.pause();
+        Sku.insertMany(csvData)
+          .then(() => {
+            console.log('sku test inserted to collection');
+            stream.destroy();
+            return;
+          })
+          .catch((err) => console.error('sku collection failed: ', err));
+        csvData =[];
+      }
+    })
+    .on('end', () => {
+      console.log('mongodb finished updating sku collection');
+    })
+    .on('error', (err) => {
+      console.error('mongodb failed to update sku collection', err);
+    });
+};
+
+const seedStyles = () => {
+
+  const skusFile = path.join(__dirname, '../data/styles.csv');
+  var csvData = [];
+  var batchSize = 10;
+  var count = 0;
+
+  const stream = fs.createReadStream(skusFile)
+    .pipe(parse({
+      delimiter: ',',
+      columns: true,
+      relax_quotes: true,
+      relax_column_count: true
+    }))
+    .on('data', (row) => {
+      csvData.push({
+        product_id: parseInt(row.productId),
+        style_id: parseInt(row.id),
+        name: row.name,
+        original_price: row.original_price,
+        sale_price: row.sale_price,
+        default_style: row.default_style
+      });
+
+      count++;
+
+      if (count === 10) {
+        stream.pause();
+        Style.insertMany(csvData)
+          .then(() => {
+            console.log('style test inserted to collection');
+            stream.destroy();
+            return;
+          })
+          .catch((err) => console.error('style collection failed: ', err));
+        csvData =[];
+      }
+    })
+    .on('end', () => {
+      console.log('mongodb finished updating style collection');
+    })
+    .on('error', (err) => {
+      console.error('mongodb failed to update style collection', err);
+    });
+};
+
+const seedCart = () => {
+
+  const cartFile = path.join(__dirname, '../data/cart.csv');
+  var csvData = [];
+  var batchSize = 10;
+  var count = 0;
+
+  const stream = fs.createReadStream(cartFile)
+    .pipe(parse({
+      delimiter: ',',
+      columns: true,
+      relax_quotes: true,
+      relax_column_count: true
+    }))
+    .on('data', (row) => {
+      csvData.push({
+        id: parseInt(row.id),
+        user_session: parseInt(row.user_session),
+        sku_id: parseInt(row.product_id),
+        active: parseInt(row.active)
+      });
+
+      count++;
+
+      if (count === 10) {
+        stream.pause();
+        Cart.insertMany(csvData)
+          .then(() => {
+            console.log('cart test inserted to collection');
+            stream.destroy();
+            return;
+          })
+          .catch((err) => console.error('cart collection failed: ', err));
+        csvData =[];
+      }
+    })
+    .on('end', () => {
+      console.log('mongodb finished updating cart collection');
+    })
+    .on('error', (err) => {
+      console.error('mongodb failed to update cart collection', err);
+    });
+};
 
 
-module.exports = { seedProduct, seedRelated, seedFeatures, seedPhotos };
+
+module.exports = { seedProduct, seedRelated, seedFeatures, seedPhotos, seedSkus, seedStyles, seedCart };

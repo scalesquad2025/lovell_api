@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
-const { seedProduct, seedRelated, seedFeatures, seedPhotos } = require('./etl.js');
+const { seedProduct, seedRelated, seedFeatures, seedPhotos, seedSkus, seedStyles, seedCart } = require('./etl.js');
 
 const app = express();
 
@@ -18,7 +18,16 @@ const runETL = async () => {
     console.log('features seeding');
 
     await seedPhotos();
-    console.log('photos seeding');
+    console.log('photos seeding')
+
+    await seedSkus();
+    console.log('skus seeding');
+
+    await seedStyles();
+    console.log('styles seeding');
+
+    await seedCart();
+    console.log('cart seeding');
   }
   catch (err) {
     console.error(err);

@@ -31,7 +31,7 @@ const productSchema = mongoose.Schema ({
 
 
 const photoSchema = mongoose.Schema ({
-  id: {type: Number, unique: true },
+  id: { type: Number, unique: true },
   style_id: { type: Number, ref: 'Style', required: true },
   thumbnail_url: { type: String },
   url: { type: String }
@@ -46,7 +46,7 @@ const skuSchema = mongoose.Schema ({
 
 const styleSchema = mongoose.Schema ({
   product_id: { type: Number, ref: 'Product', required: true },
-  style_id: { type: Number, unique: true },
+  style_id: { type: Number },
   name: { type: String },
   original_price: { type: String },
   sale_price: { type: String },
@@ -55,7 +55,8 @@ const styleSchema = mongoose.Schema ({
 
 
 const cartSchema = mongoose.Schema ({
-  user_id: { type: Number, unique: true, required: true },
+  id: { type: Number, unique: true, required: true },
+  user_session: { type: Number },
   sku_id: { type: Number },
   count: { type: String }
 });
