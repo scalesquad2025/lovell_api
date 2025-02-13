@@ -8,27 +8,6 @@ const app = express();
 
 const runETL = async () => {
   try {
-    // await seedProduct();
-    // console.log('product seeding');
-
-    // await seedRelated();
-    // console.log('related seeding');
-
-    // await seedFeatures();
-    // console.log('features seeding');
-
-    // await seedPhotos();
-    // console.log('photos seeding')
-
-    // await seedSkus();
-    // console.log('skus seeding');
-
-    // await seedStyles();
-    // console.log('styles seeding');
-
-    // await seedCart();
-    // console.log('cart seeding');
-
     console.log('seeding MongoDB...');
 
     await Promise.all([
