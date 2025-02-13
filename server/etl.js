@@ -8,7 +8,7 @@ const seedProduct = () => {
 
   const productFile = path.join(__dirname, '../data/product.csv');
   var csvData = [];
-  var batchSize = 10;
+  var batchSize = 10000;
   var count = 0;
 
   const stream = fs.createReadStream(productFile)
@@ -30,20 +30,27 @@ const seedProduct = () => {
 
       count++;
 
-      if (count === 10) {
+      if (csvData.length === batchSize) {
         stream.pause();
         Product.insertMany(csvData)
           .then(() => {
-            console.log('products inserted');
-            stream.destroy();
-            return;
+            console.log(`${count} products seeded`);
+            csvData =[];
+            stream.resume();
           })
-          .catch((err) => console.error('products failed: ', err));
-        csvData =[];
+          .catch((err) => console.error('product seed failed: ', err));
       }
     })
     .on('end', () => {
-      console.log('mongodb finished updating product collection');
+      if (csvData.length > 0) {
+        Product.insertMany(csvData)
+          .then(() => {
+            console.log('final products have been seeded');
+            csvData =[];
+          })
+          .catch((err) => console.error('product seed failed: ', err));
+      }
+      console.log('** mongodb finished updating product collection **');
     })
     .on('error', (err) => {
       console.error('mongodb failed to update product collection', err);
@@ -54,7 +61,7 @@ const seedRelated = () => {
 
   const relatedFile = path.join(__dirname, '../data/related.csv');
   var csvData = [];
-  var batchSize = 10;
+  var batchSize = 10000;
   var count = 0;
 
   const stream = fs.createReadStream(relatedFile)
@@ -73,20 +80,27 @@ const seedRelated = () => {
 
       count++;
 
-      if (count === 10) {
+      if (csvData.length === batchSize) {
         stream.pause();
         Related.insertMany(csvData)
           .then(() => {
-            console.log('related test inserted to collection');
-            stream.destroy();
-            return;
+            console.log(`${count} related seeded`);
+            csvData = [];
+            stream.resume();
           })
           .catch((err) => console.error('related collection failed: ', err));
-        csvData =[];
       }
     })
     .on('end', () => {
-      console.log('mongodb finished updating related collection');
+      if (csvData.length > 0) {
+        Related.insertMany(csvData)
+          .then(() => {
+            console.log('final related seeded');
+            csvData = [];
+          })
+          .catch((err) => console.error('related collection failed: ', err));
+      }
+      console.log('** mongodb finished updating related collection **');
     })
     .on('error', (err) => {
       console.error('mongodb failed to update related collection', err);
@@ -97,7 +111,7 @@ const seedFeatures = () => {
 
   const featuresFile = path.join(__dirname, '../data/features.csv');
   var csvData = [];
-  var batchSize = 10;
+  var batchSize = 10000;
   var count = 0;
 
   const stream = fs.createReadStream(featuresFile)
@@ -117,20 +131,27 @@ const seedFeatures = () => {
 
       count++;
 
-      if (count === 10) {
+      if (csvData.length === batchSize) {
         stream.pause();
         Feature.insertMany(csvData)
           .then(() => {
-            console.log('features test inserted to collection');
-            stream.destroy();
-            return;
+            console.log(`${count} features seeded`);
+            csvData = [];
+            stream.resume();
           })
-          .catch((err) => console.error('features collection failed: ', err));
-        csvData =[];
+          .catch((err) => console.error('features seed failed: ', err));
       }
     })
     .on('end', () => {
-      console.log('mongodb finished updating features collection');
+      if (csvData.length > 0) {
+        Feature.insertMany(csvData)
+          .then(() => {
+            console.log('final features seeded');
+            csvData = [];
+          })
+          .catch((err) => console.error('features seed failed: ', err));
+      }
+      console.log('** mongodb finished updating features collection **');
     })
     .on('error', (err) => {
       console.error('mongodb failed to update features collection', err);
@@ -141,7 +162,7 @@ const seedPhotos = () => {
 
   const photosFile = path.join(__dirname, '../data/photos.csv');
   var csvData = [];
-  var batchSize = 10;
+  var batchSize = 10000;
   var count = 0;
 
   const stream = fs.createReadStream(photosFile)
@@ -161,20 +182,27 @@ const seedPhotos = () => {
 
       count++;
 
-      if (count === 10) {
+      if (csvData.length === batchSize) {
         stream.pause();
         Photo.insertMany(csvData)
           .then(() => {
-            console.log('photo test inserted to collection');
-            stream.destroy();
-            return;
+            console.log(`${count} photos seeded`);
+            csvData = [];
+            stream.resume();
           })
           .catch((err) => console.error('photo collection failed: ', err));
-        csvData =[];
       }
     })
     .on('end', () => {
-      console.log('mongodb finished updating photo collection');
+      if (csvData.length > 0) {
+        Photo.insertMany(csvData)
+          .then(() => {
+            console.log('final photos seeded');
+            csvData = [];
+          })
+          .catch((err) => console.error('photo collection failed: ', err));
+      }
+      console.log('** mongodb finished updating photo collection **');
     })
     .on('error', (err) => {
       console.error('mongodb failed to update photo collection', err);
@@ -185,7 +213,7 @@ const seedSkus = () => {
 
   const skusFile = path.join(__dirname, '../data/skus.csv');
   var csvData = [];
-  var batchSize = 10;
+  var batchSize = 10000;
   var count = 0;
 
   const stream = fs.createReadStream(skusFile)
@@ -205,19 +233,26 @@ const seedSkus = () => {
 
       count++;
 
-      if (count === 10) {
+      if (csvData.length === batchSize) {
         stream.pause();
         Sku.insertMany(csvData)
           .then(() => {
-            console.log('sku test inserted to collection');
-            stream.destroy();
-            return;
+            console.log(`${count} skus seeded`);
+            csvData = [];
+            stream.resume();
           })
           .catch((err) => console.error('sku collection failed: ', err));
-        csvData =[];
       }
     })
     .on('end', () => {
+      if (csvData.length > 0) {
+        Sku.insertMany(csvData)
+          .then(() => {
+            console.log(`${count} skus seeded`);
+            csvData = [];
+          })
+          .catch((err) => console.error('sku collection failed: ', err));
+      }
       console.log('mongodb finished updating sku collection');
     })
     .on('error', (err) => {
@@ -229,7 +264,7 @@ const seedStyles = () => {
 
   const skusFile = path.join(__dirname, '../data/styles.csv');
   var csvData = [];
-  var batchSize = 10;
+  var batchSize = 10000;
   var count = 0;
 
   const stream = fs.createReadStream(skusFile)
@@ -251,20 +286,27 @@ const seedStyles = () => {
 
       count++;
 
-      if (count === 10) {
+      if (csvData.length === batchSize) {
         stream.pause();
         Style.insertMany(csvData)
           .then(() => {
-            console.log('style test inserted to collection');
-            stream.destroy();
-            return;
+            console.log(`${count} styles seeded`);
+            csvData = [];
+            stream.resume();
           })
           .catch((err) => console.error('style collection failed: ', err));
-        csvData =[];
       }
     })
     .on('end', () => {
-      console.log('mongodb finished updating style collection');
+      if (csvData.length > 0) {
+        Style.insertMany(csvData)
+          .then(() => {
+            console.log('final styles seeded');
+            csvData = [];
+          })
+          .catch((err) => console.error('style collection failed: ', err));
+      }
+      console.log('** mongodb finished updating style collection **');
     })
     .on('error', (err) => {
       console.error('mongodb failed to update style collection', err);
@@ -275,7 +317,7 @@ const seedCart = () => {
 
   const cartFile = path.join(__dirname, '../data/cart.csv');
   var csvData = [];
-  var batchSize = 10;
+  var batchSize = 100;
   var count = 0;
 
   const stream = fs.createReadStream(cartFile)
@@ -295,20 +337,27 @@ const seedCart = () => {
 
       count++;
 
-      if (count === 10) {
+      if (csvData.length === batchSize) {
         stream.pause();
         Cart.insertMany(csvData)
           .then(() => {
-            console.log('cart test inserted to collection');
-            stream.destroy();
-            return;
+            console.log(`${count} carts seeded`);
+            csvData = [];
+            stream.resume();
           })
           .catch((err) => console.error('cart collection failed: ', err));
-        csvData =[];
       }
     })
     .on('end', () => {
-      console.log('mongodb finished updating cart collection');
+      if (csvData.length > 0) {
+        Cart.insertMany(csvData)
+          .then(() => {
+            console.log('final carts seeded');
+            csvData = [];
+          })
+          .catch((err) => console.error('cart collection failed: ', err));
+      }
+      console.log('** mongodb finished updating cart collection **');
     })
     .on('error', (err) => {
       console.error('mongodb failed to update cart collection', err);
