@@ -443,5 +443,30 @@ const seedCart = () => {
 };
 
 
+const runETL = async () => {
+  try {
+    console.log('seeding MongoDB...');
+
+    await Promise.all([
+      seedProduct();
+      seedRelated();
+      seedFeatures();
+      seedPhotos();
+      seedSkus();
+      seedStyles();
+      seedCart();
+    ]);
+    console.log('All seeding complete! Ending process...');
+    process.exit(0);
+  }
+  catch (err) {
+    console.error('Seeding failed: ', err);
+    process.exit(1);
+  }
+};
+
+runETL();
+
+
 
 module.exports = { seedProduct, seedRelated, seedFeatures, seedPhotos, seedSkus, seedStyles, seedCart };

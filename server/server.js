@@ -1,34 +1,60 @@
 require('dotenv').config();
 const express = require('express');
-const axios = require('axios');
-const path = require('path');
-const { seedProduct, seedRelated, seedFeatures, seedPhotos, seedSkus, seedStyles, seedCart } = require('./etl.js');
+const mongoose = require('mongoose');
+// const path = require('path');
+const { Feature, Related, Product, Photo, Sku, Style, Cart } = require('./db.js');
 
 const app = express();
 
-const runETL = async () => {
+app.use(express.json());
+
+app.get('/products', async (req, res) => {
   try {
-    console.log('seeding MongoDB...');
-
-    await Promise.all([
-      seedProduct();
-      seedRelated();
-      seedFeatures();
-      seedPhotos();
-      seedSkus();
-      seedStyles();
-      seedCart();
-    ]);
-    console.log('All seeding complete! Ending process...');
-    process.exit(0);
+    const products = await Product.find().limit(5);
+    res.status(200).json(products);
+  } catch (err) {
+    console.error('products view failed: ', err);
+    res.status(500);
   }
-  catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
-};
+});
 
-runETL();
+app.get('/products/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+  } catch (err) {
+    console.error('product fetch failed: ', err);
+    res.status(500);
+  }
+});
+
+app.get('/products/:id/styles', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+  } catch (err) {
+    console.error('styles fetch failed: ', err);
+    res.status(500);
+  }
+});
+
+app.get('/products/:id/related', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+  } catch (err) {
+    console.error('related fetch failed: ', err);
+    res.status(500);
+  }
+});
+
+app.get('/cart', async (req, res) => {
+  try {
+    //
+  } catch (err) {
+    console.error('cart fetch failed: ', err);
+    res.status(500);
+  }
+});
+
+app.post('/cart');
 
 app.listen(process.env.PORT); // 3000
 console.log(`Listening at http://localhost:${process.env.PORT}`);
