@@ -8,29 +8,44 @@ const app = express();
 
 const runETL = async () => {
   try {
-    await seedProduct();
-    console.log('product seeding');
+    // await seedProduct();
+    // console.log('product seeding');
 
-    await seedRelated();
-    console.log('related seeding');
+    // await seedRelated();
+    // console.log('related seeding');
 
-    await seedFeatures();
-    console.log('features seeding');
+    // await seedFeatures();
+    // console.log('features seeding');
 
-    await seedPhotos();
-    console.log('photos seeding')
+    // await seedPhotos();
+    // console.log('photos seeding')
 
-    await seedSkus();
-    console.log('skus seeding');
+    // await seedSkus();
+    // console.log('skus seeding');
 
-    await seedStyles();
-    console.log('styles seeding');
+    // await seedStyles();
+    // console.log('styles seeding');
 
-    await seedCart();
-    console.log('cart seeding');
+    // await seedCart();
+    // console.log('cart seeding');
+
+    console.log('seeding MongoDB...');
+
+    await Promise.all([
+      seedProduct();
+      seedRelated();
+      seedFeatures();
+      seedPhotos();
+      seedSkus();
+      seedStyles();
+      seedCart();
+    ]);
+    console.log('All seeding complete! Ending process...');
+    process.exit(0);
   }
   catch (err) {
     console.error(err);
+    process.exit(1);
   }
 };
 
