@@ -11,19 +11,45 @@ app.use(express.json());
 app.get('/products', async (req, res) => {
   try {
     const products = await Product.find().limit(5);
-    res.status(200).json(products);
+    return res.status(200).json(products);
   } catch (err) {
     console.error('products view failed: ', err);
-    res.status(500);
+    return res.status(500);
   }
 });
 
 app.get('/products/:id', async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const p_id = parseInt(req.params.id);
+
+    const product = await db.products.aggregate([
+      {
+        $match: {id: p_id}
+      },
+      {
+      $lookup: {
+        from: 'features',
+        localField: 'id',
+        foreignField: 'product_id',
+        as: 'features'
+        }
+      },
+      {
+        $project: {
+          '_id': 0,
+          '__v': 0,
+          'features._id': 0,
+          'features.__v': 0,
+          'features.id': 0,
+          'features.product_id': 0}
+      }
+    ]);
+
+    return res.status(200).json(product);
+
   } catch (err) {
     console.error('product fetch failed: ', err);
-    res.status(500);
+    return res.status(500);
   }
 });
 
@@ -32,7 +58,7 @@ app.get('/products/:id/styles', async (req, res) => {
     const id = parseInt(req.params.id);
   } catch (err) {
     console.error('styles fetch failed: ', err);
-    res.status(500);
+    return res.status(500);
   }
 });
 
@@ -41,7 +67,7 @@ app.get('/products/:id/related', async (req, res) => {
     const id = parseInt(req.params.id);
   } catch (err) {
     console.error('related fetch failed: ', err);
-    res.status(500);
+    return res.status(500);
   }
 });
 
@@ -50,7 +76,7 @@ app.get('/cart', async (req, res) => {
     //
   } catch (err) {
     console.error('cart fetch failed: ', err);
-    res.status(500);
+    return res.status(500);
   }
 });
 
@@ -58,3 +84,30 @@ app.post('/cart');
 
 app.listen(process.env.PORT); // 3000
 console.log(`Listening at http://localhost:${process.env.PORT}`);
+
+
+db.products.aggregate([
+  {
+    $match: {id: 40344}
+  },
+  {
+  $lookup: {
+    from: 'features',
+    localField: 'id',
+    foreignField: 'product_id',
+    as: 'features'
+    }
+  },
+  {
+    $project: {
+      '_id': 0,
+      '__v': 0,
+      'features._id': 0,
+      'features.__v': 0,
+      'features.id': 0,
+      'features.product_id': 0}
+  },
+  {
+    $limit: 2
+  }
+])
