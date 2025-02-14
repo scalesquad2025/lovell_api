@@ -128,7 +128,7 @@ const getRelated = async (productId) => {
     { $match: { product_id: productId } },
     {
       $group: {
-        _id: null,
+        _id: '$product_id',
         related: { $push: "$related_product_id" }
       }
     },
