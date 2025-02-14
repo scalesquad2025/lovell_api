@@ -448,13 +448,13 @@ const runETL = async () => {
     console.log('seeding MongoDB...');
 
     await Promise.all([
-      seedProduct();
-      seedRelated();
-      seedFeatures();
-      seedPhotos();
-      seedSkus();
-      seedStyles();
-      seedCart();
+      seedProduct(),
+      seedRelated(),
+      seedFeatures(),
+      seedPhotos(),
+      seedSkus(),
+      seedStyles(),
+      seedCart()
     ]);
     console.log('All seeding complete! Ending process...');
     process.exit(0);
