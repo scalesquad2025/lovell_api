@@ -35,14 +35,14 @@ const photoSchema = mongoose.Schema ({
   style_id: { type: Number, ref: 'Style', required: true, index: true },
   thumbnail_url: { type: String },
   url: { type: String }
-})
+});
 
 const skuSchema = mongoose.Schema ({
   id: {type: Number, unique: true, index: true },
   style_id: { type: Number, ref: 'Style', required: true, index: true },
   quantity: {type: Number},
   size: {type: String}
-})
+});
 
 const styleSchema = mongoose.Schema ({
   product_id: { type: Number, ref: 'Product', required: true, index: true },
