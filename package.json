@@ -7,17 +7,21 @@
   "scripts": {
     "server-dev": "npx nodemon --watch ./server/server.js",
     "start": "node ./server/server.js",
-    "seed": "node ./server/etl.js"
+    "seed": "node ./server/etl.js",
+    "test": "cross-env NODE_ENV=test jest --testTimeout=5000"
   },
   "dependencies": {
     "axios": "^1.7.9",
+    "cross-env": "^7.0.3",
     "csv-parse": "^5.6.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "jest": "^29.7.0",
     "mongoose": "^8.10.0",
     "node": "^23.7.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "supertest": "^7.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
