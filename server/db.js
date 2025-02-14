@@ -5,20 +5,20 @@ mongoose.connect(process.env.MONGODB_URI);
 mongoose.connection.on('error', (err) => console.error('mongoose failed: ', err));
 
 const featureSchema = mongoose.Schema ({
-  id: { type: Number, unique: true },
-  product_id: { type: Number, ref: 'Product', required: true },
+  id: { type: Number, unique: true, index: true },
+  product_id: { type: Number, ref: 'Product', required: true, index: true },
   feature: { type: String },
   value: { type: String }
 });
 
 const relatedSchema = mongoose.Schema ({
-  id: { type: Number, unique: true },
-  product_id: { type: Number, ref: 'Product' },
-  related_product_id: { type: Number, ref: 'Product', required: true }
+  id: { type: Number, unique: true, index: true },
+  product_id: { type: Number, ref: 'Product', index: true },
+  related_product_id: { type: Number, ref: 'Product', required: true, index: true }
 });
 
 const productSchema = mongoose.Schema ({
-  id: { type: Number, unique: true, required: true },
+  id: { type: Number, unique: true, required: true, index: true },
   campus: { type: String },
   name: { type: String },
   slogan: { type: String },
@@ -31,22 +31,22 @@ const productSchema = mongoose.Schema ({
 
 
 const photoSchema = mongoose.Schema ({
-  id: { type: Number, unique: true },
-  style_id: { type: Number, ref: 'Style', required: true },
+  id: { type: Number, unique: true, index: true },
+  style_id: { type: Number, ref: 'Style', required: true, index: true },
   thumbnail_url: { type: String },
   url: { type: String }
 })
 
 const skuSchema = mongoose.Schema ({
-  id: {type: Number, unique: true },
-  style_id: { type: Number, ref: 'Style', required: true },
+  id: {type: Number, unique: true, index: true },
+  style_id: { type: Number, ref: 'Style', required: true, index: true },
   quantity: {type: Number},
   size: {type: String}
 })
 
 const styleSchema = mongoose.Schema ({
-  product_id: { type: Number, ref: 'Product', required: true },
-  style_id: { type: Number },
+  product_id: { type: Number, ref: 'Product', required: true, index: true },
+  style_id: { type: Number, index: true },
   name: { type: String },
   original_price: { type: String },
   sale_price: { type: String },
@@ -55,9 +55,9 @@ const styleSchema = mongoose.Schema ({
 
 
 const cartSchema = mongoose.Schema ({
-  id: { type: Number, unique: true, required: true },
-  user_session: { type: Number },
-  sku_id: { type: Number },
+  id: { type: Number, unique: true, required: true, index: true },
+  user_session: { type: Number, index: true },
+  sku_id: { type: Number, index: true },
   count: { type: String }
 });
 
