@@ -3,9 +3,9 @@ import { check, sleep } from 'k6';
 
 export const options = {
   stages: [
-    { duration: '30s', target: 10 },
-    { duration: '1m', target: 10 },
-    { duration: '30s', target: 0 }
+    { duration: '30s', target: 100 },
+    { duration: '1m', target: 100 },
+    { duration: '1m', target: 0 }
   ],
   thresholds: {
     http_req_failed: ['rate<0.02'],
@@ -19,7 +19,7 @@ export const options = {
 };
 
 export default function () {
-  let res = http.get('http://localhost:3000/products/40344/styles');
+  let res = http.get('https://8186-73-241-73-129.ngrok-free.app/products/40344/styles');
   check(res, {
     'status is 200': (r) => r.status === 200
   });
