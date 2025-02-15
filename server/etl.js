@@ -3,6 +3,7 @@ const { parse } = require('csv-parse');
 const path = require('path');
 const mongoose = require('mongoose');
 const { Feature, Related, Product, Photo, Sku, Style, Cart } = require('./db.js');
+// before refactor
 
 const seedProduct = () => {
 

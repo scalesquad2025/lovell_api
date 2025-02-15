@@ -8,7 +8,9 @@
     "server-dev": "npx nodemon --watch ./server/server.js",
     "start": "node ./server/server.js",
     "seed": "node ./server/etl.js",
-    "test": "cross-env NODE_ENV=test jest --testTimeout=5000"
+    "test": "cross-env NODE_ENV=test jest --testTimeout=5000",
+    "k6-cloud": "k6 cloud tests/load_test.js",
+    "k6-local": "k6 run tests/local_load_test.js"
   },
   "dependencies": {
     "axios": "^1.7.9",

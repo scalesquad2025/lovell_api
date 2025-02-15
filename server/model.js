@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Feature, Related, Product, Photo, Sku, Style, Cart } = require('./db.js');
+// before refactor
 
 
 const getProductView = async () => {
@@ -142,6 +143,8 @@ const getRelated = async (productId) => {
 };
 
 module.exports = { getStyles, getProduct, getProductView, getRelated };
+
+
 
 
 // db.products.aggregate([

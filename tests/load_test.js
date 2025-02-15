@@ -1,5 +1,6 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+// before refactor
 
 export const options = {
   stages: [
@@ -19,10 +20,12 @@ export const options = {
 };
 
 export default function () {
-  let res = http.get('https://8186-73-241-73-129.ngrok-free.app/products/40344/styles');
+  let res = http.get('https://8186-73-241-73-129.ngrok-free.app/products/40344/styles'); // dynamic
   check(res, {
     'status is 200': (r) => r.status === 200
   });
   sleep(1);
 };
+
+
 
