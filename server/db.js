@@ -36,7 +36,7 @@ const skusSchema = mongoose.Schema ({
 });
 
 const styleSchema = mongoose.Schema ({
-  product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', index: true },
+  product_id: { type: Number, index: true },
   results: [
     {
       style_id: { type: Number, unique: true, index: true },
