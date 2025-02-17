@@ -11,6 +11,7 @@ const seedProduct = async () => {
 
     const productFile = path.join(__dirname, '../data/product.csv');
     var productBatch = [];
+    var count = 0;
 
     const productStream = fs.createReadStream(productFile)
       .pipe(parse({
@@ -35,7 +36,8 @@ const seedProduct = async () => {
 
       if (productBatch.length === batchSize) {
         await Product.insertMany(productBatch);
-        console.log(`${productBatch.length} products seeded`)
+        count += batchSize;
+        console.log(`${count} products seeded`)
         productBatch = [];
       }
     }
@@ -64,40 +66,32 @@ const seedFeatures = async () => {
         columns: true,
         relax_quotes: true,
         relax_column_count: true
-      }))
-      .on('data', (row) => {
-        bulkOps.push({
-          updateOne: {
-            filter: { id: row.product_id },
-            update: {
-              $addToSet: {
-                features: { feature: row.feature, value: row.value} } },
-            upsert: true
-          }
-        })
+      }));
 
-        if (bulkOps.length === batchSize) {
-          featureStream.pause();
-          Product.bulkWrite(bulkOps)
-            .then(() => {
-              console.log(`${bulkOps.length} features embedded`);
-              bulkOps = [];
-              featureStream.resume();
-            })
-            .catch((err) => {
-              console.error('bulk features failed', err);
-            })
+    for await (const row of featureStream) {
+      bulkOps.push({
+        updateOne: {
+          filter: { id: row.product_id },
+          update: {
+            $addToSet: {
+              features: { feature: row.feature, value: row.value} },
+            $set: { updated_at: new Date() } },
+          upsert: true
         }
-      })
-      .on('end', async () => {
-        if (bulkOps.length > 0) {
-          await Product.bulkWrite(bulkOps);
-          console.log('* final features seeded *')
-        }
-      })
-      .on('error', (err) => {
-        console.log('feature stream error', err);
-      })
+      });
+
+      if (bulkOps.length === batchSize) {
+        await Product.bulkWrite(bulkOps);
+        count += batchSize;
+        console.log(`${count} features embedded`);
+        bulkOps = [];
+      }
+    }
+
+    if (bulkOps.length > 0) {
+      await Product.bulkWrite(bulkOps);
+      console.log('* final features seeded *')
+    }
 
   } catch (err) {
     console.error('features seed failed', err);
@@ -110,6 +104,7 @@ const seedRelated = async () => {
 
     const relatedFile = path.join(__dirname, '../data/related.csv');
     var bulkOps = [];
+    var count = 0;
 
     const relatedStream = fs.createReadStream(relatedFile)
       .pipe(parse({
@@ -117,40 +112,32 @@ const seedRelated = async () => {
         columns: true,
         relax_quotes: true,
         relax_column_count: true
-      }))
-      .on('data', (row) => {
-        bulkOps.push({
-          updateOne: {
-            filter: { id: parseInt(row.current_product_id) },
-            update: {
-              $addToSet: {
-                related: parseInt(row.related_product_id) } },
-            upsert: true
-          }
-        })
+      }));
 
-        if (bulkOps.length === batchSize) {
-          relatedStream.pause();
-          Product.bulkWrite(bulkOps)
-            .then(() => {
-              console.log(`${bulkOps.length} related embedded`);
-              bulkOps = [];
-              relatedStream.resume();
-            })
-            .catch((err) => {
-              console.error('bulk related failed', err);
-            })
+    for await (const row of relatedStream) {
+      bulkOps.push({
+        updateOne: {
+          filter: { id: parseInt(row.current_product_id) },
+          update: {
+            $addToSet: {
+              related: parseInt(row.related_product_id) },
+            $set: { updated_at: new Date() } },
+          upsert: true
         }
-      })
-      .on('end', async () => {
-        if (bulkOps.length > 0) {
-          await Product.bulkWrite(bulkOps);
-          console.log('* final related seeded *');
-        }
-      })
-      .on('error', (err) => {
-        console.error('related stream error', err);
-      })
+      });
+
+      if (bulkOps.length === batchSize) {
+        await Product.bulkWrite(bulkOps)
+        count += batchSize;
+        console.log(`${count} related embedded`);
+        bulkOps = [];
+      }
+    }
+
+    if (bulkOps.length > 0) {
+      await Product.bulkWrite(bulkOps);
+      console.log('* final related seeded *');
+    }
 
   } catch (err) {
     console.error('related seed failed', err);
@@ -163,6 +150,7 @@ const seedStyles = async () => {
 
     const stylesFile = path.join(__dirname, '../data/styles.csv');
     var styleBatch= [];
+    var count = 0;
 
     const styleStream = fs.createReadStream(stylesFile)
       .pipe(parse({
@@ -186,7 +174,8 @@ const seedStyles = async () => {
 
       if (styleBatch.length === batchSize) {
         await Style.insertMany(styleBatch);
-        console.log(`${styleBatch.length} styles seeded`);
+        count += batchSize;
+        console.log(`${count} styles seeded`);
         styleBatch = [];
       }
     }
@@ -207,6 +196,7 @@ const seedPhotos = async () => {
 
     const photosFile = path.join(__dirname, '../data/photos.csv');
     var bulkOps = [];
+    var count = 0;
 
     const photoStream = fs.createReadStream(photosFile)
       .pipe(parse({
@@ -230,7 +220,8 @@ const seedPhotos = async () => {
 
       if (bulkOps.length === batchSize) {
         await Style.bulkWrite(bulkOps);
-        console.log(`${bulkOps.length} photos embedded`);
+        count += batchSize;
+        console.log(`${count} photos embedded`);
         bulkOps = [];
       }
     }
@@ -251,6 +242,7 @@ const seedSkus = async () => {
 
     const skusFile = path.join(__dirname, '../data/skus.csv');
     var bulkOps = [];
+    var count = 0;
 
     const skuStream = fs.createReadStream(skusFile)
       .pipe(parse({
@@ -274,7 +266,8 @@ const seedSkus = async () => {
 
       if (bulkOps.length === batchSize) {
         await Style.bulkWrite(bulkOps);
-        console.log(`${bulkOps.length} skus embedded`);
+        count += batchSize;
+        console.log(`${count} skus embedded`);
         bulkOps = [];
       }
     }
@@ -291,84 +284,76 @@ const seedSkus = async () => {
 
 
 
-const seedCart = () => {
+const seedCart = async () => {
+  try {
 
-  return new Promise((resolve, reject) => {
     const cartFile = path.join(__dirname, '../data/cart.csv');
     var csvData = [];
-    var batchSize = 100;
+    var cartBatchSize = 100;
     var count = 0;
 
-    const stream = fs.createReadStream(cartFile)
+    const cartStream = fs.createReadStream(cartFile)
       .pipe(parse({
         delimiter: ',',
         columns: true,
         relax_quotes: true,
         relax_column_count: true
-      }))
-      .on('data', (row) => {
-        csvData.push({
-          id: parseInt(row.id),
-          user_session: parseInt(row.user_session),
-          sku_id: parseInt(row.product_id),
-          active: parseInt(row.active)
-        });
+      }));
 
-        count++;
-
-        if (csvData.length === batchSize) {
-          stream.pause();
-          Cart.insertMany(csvData)
-            .then(() => {
-              console.log(`${count} carts seeded`);
-              csvData = [];
-              stream.resume();
-            })
-            .catch((err) => {
-              console.error('cart collection failed: ');
-              reject(err);
-            });
-        }
-      })
-      .on('end', () => {
-        if (csvData.length > 0) {
-          Cart.insertMany(csvData)
-            .then(() => {
-              console.log('final carts seeded');
-              resolve();
-            })
-            .catch((err) => {
-              console.error('cart collection failed: ');
-              reject(err);
-            });
-        } else {
-          console.log('** mongodb finished updating cart collection **');
-          resolve();
-        }
-      })
-      .on('error', (err) => {
-        console.error('mongodb failed to update cart collection');
-        reject(err);
+    for await (const row of cartStream) {
+      csvData.push({
+        id: parseInt(row.id),
+        user_session: parseInt(row.user_session),
+        sku_id: parseInt(row.product_id),
+        active: parseInt(row.active)
       });
-  });
+
+      if (csvData.length === cartBatchSize) {
+        await Cart.insertMany(csvData);
+        count += csvData.length;
+        console.log(`${count} carts seeded`);
+        csvData = [];
+      }
+    }
+
+    if (csvData.length > 0) {
+      await Cart.insertMany(csvData);
+      console.log('* final carts seeded *');
+    }
+
+  } catch (err) {
+    console.error('mongodb failed to update cart collection');
+  }
+
 };
 
 
+
+const dropDB = async () => {
+  await mongoose.connection.dropDatabase();
+  console.log('existing database dropped');
+}
+
 const runETL = async () => {
   try {
-    console.log('seeding MongoDB...');
+    await dropDB();
 
+    console.log('seeding Products...');
     await seedProduct();
     await seedRelated();
     await seedFeatures();
 
+    console.log('seeding Styles...')
     await seedStyles();
     await seedPhotos();
     await seedSkus();
+
+    console.log('seeding Carts...');
     await seedCart();
 
     console.log('All seeding complete! Ending process...');
     process.exit(0);
+
   } catch (err) {
     console.error('Seeding failed: ', err);
     process.exit(1);
@@ -377,4 +362,4 @@ const runETL = async () => {
 
 runETL();
 
-module.exports = { seedProduct, seedRelated, seedFeatures, seedPhotos, seedSkus, seedStyles, seedCart };
+
