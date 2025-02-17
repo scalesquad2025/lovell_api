@@ -11,7 +11,7 @@ const featuresSchema = mongoose.Schema ({
 
 
 const productSchema = mongoose.Schema ({
-  id: { type: Number, unique: true },
+  id: { type: Number, unique: true, index: true },
   campus: { type: String },
   name: { type: String },
   slogan: { type: String },
@@ -36,14 +36,14 @@ const skusSchema = mongoose.Schema ({
 });
 
 const styleSchema = mongoose.Schema ({
-  product_id: { type: Schema.Types.ObjectId, ref: 'Product' },
+  product_id: { type: Schema.Types.ObjectId, ref: 'Product', index: true },
   results: [
     {
-      style_id: { type: Number, unique: true },
+      style_id: { type: Number, unique: true, index: true },
       name: { type: String },
       original_price: { type: String },
       sale_price: { type: String },
-      default?: { type: Boolean, default: false },
+      default_style: { type: Boolean, default: false },
       photos: [photosSchema],
       skus: {
         type: Map,
