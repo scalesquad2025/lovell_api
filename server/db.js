@@ -7,7 +7,8 @@ mongoose.connection.on('error', (err) => console.error('mongoose failed: ', err)
 const featuresSchema = mongoose.Schema ({
   feature: { type: String },
   value: { type: String }
-})
+});
+
 
 const productSchema = mongoose.Schema ({
   id: { type: Number, unique: true },
@@ -19,7 +20,8 @@ const productSchema = mongoose.Schema ({
   default_price: { type: String },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
-  features: [featuresSchema]
+  features: [featuresSchema],
+  related: [{ type: 'Number' }]
 });
 
 
@@ -31,7 +33,7 @@ const photosSchema = mongoose.Schema ({
 const skusSchema = mongoose.Schema ({
   quantity: {type: Number},
   size: {type: String}
-})
+});
 
 const styleSchema = mongoose.Schema ({
   product_id: { type: Schema.Types.ObjectId, ref: 'Product' },
@@ -52,5 +54,16 @@ const styleSchema = mongoose.Schema ({
 });
 
 
+const cartSchema = mongoose.Schema ({
+  id: { type: Number, unique: true, required: true, index: true },
+  user_session: { type: Number, index: true },
+  sku_id: { type: Number, index: true },
+  count: { type: String }
+});
+
+
 const Product = mongoose.model('Product', productSchema);
 const Style = mongoose.model('Style', styleSchema);
+const Cart = mongoose.model('Cart', cartSchema);
+
+module.exports = { Product, Style, Cart };
