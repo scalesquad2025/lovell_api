@@ -174,9 +174,9 @@ const seedStyles = async () => {
 
     for await (const row of styleStream) {
       styleBatch.push({
-        product_id: parseInt(row.product_id),
+        product_id: parseInt(row.productId),
         results: [{
-          style_id: row.style_id,
+          style_id: row.id,
           name: row.name,
           original_price: row.original_price,
           sale_price: row.sale_price,
