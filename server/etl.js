@@ -2,7 +2,7 @@ const fs = require('fs');
 const { parse } = require('csv-parse');
 const path = require('path');
 const mongoose = require('mongoose');
-const { Feature, Related, Product, Photo, Sku, Style, Cart } = require('./db.js');
+const { Product, Style, Cart } = require('./db.js');
 
 const batchSize = 10000;
 
@@ -18,37 +18,32 @@ const seedProduct = async () => {
         columns: true,
         relax_quotes: true,
         relax_column_count: true
-      }))
-      .on('data', async (row) => {
-        productBatch.push({
-          id: parseInt(row.id),
-          campus: 'hr-rfp',
-          name: row.name,
-          slogan: row.slogan,
-          description: row.description,
-          category: row.category,
-          default_price: row.default_price,
-          features: [],
-          related: []
-        });
+      }));
 
-        if (productBatch.length === batchSize) {
-          productStream.pause();
-          await Product.insertMany(productBatch);
-          console.log(`${productBatch.length} products seeded`)
-          productBatch = [];
-          productStream.resume();
-        }
-      })
-      .on('end', async () => {
-        if (productBatch.length > 0) {
-          await Product.insertMany(productBatch);
-          console.log('* final products seeded *');
-        }
-      })
-      .on('error', (err) => {
-        console.error('product stream error', err);
-      })
+    for await (const row of productStream) {
+      productBatch.push({
+        id: parseInt(row.id),
+        campus: 'hr-rfp',
+        name: row.name,
+        slogan: row.slogan,
+        description: row.description,
+        category: row.category,
+        default_price: row.default_price,
+        features: [],
+        related: []
+      });
+
+      if (productBatch.length === batchSize) {
+        await Product.insertMany(productBatch);
+        console.log(`${productBatch.length} products seeded`)
+        productBatch = [];
+      }
+    }
+
+    if (productBatch.length > 0) {
+      await Product.insertMany(productBatch);
+      console.log('* final products seeded *');
+    }
 
   } catch (err) {
     console.error('product seed failed', err);
@@ -175,16 +170,31 @@ const seedStyles = async () => {
         columns: true,
         relax_quotes: true,
         relax_column_count: true
-      }))
-      .on('data', async (row) => {
-        styleBatch.push({
-          product_id:
-          results: [{
-            style_id: row.style_id,
-            name: row.name
-          }]
-        })
-      })
+      }));
+
+    for await (const row of styleStream) {
+      styleBatch.push({
+        product_id: parseInt(row.product_id),
+        results: [{
+          style_id: row.style_id,
+          name: row.name,
+          original_price: row.original_price,
+          sale_price: row.sale_price,
+          default_style: row.default_style
+        }]
+      });
+
+      if (styleBatch.length === batchSize) {
+        await Style.insertMany(styleBatch);
+        console.log(`${styleBatch.length} styles seeded`);
+        styleBatch = [];
+      }
+    }
+
+    if (styleBatch.length > 0) {
+      await Style.insertMany(styleBatch);
+      console.log('* final styles seeded *');
+    }
 
   } catch (err) {
     console.error('styles seed failed', err);
@@ -192,196 +202,94 @@ const seedStyles = async () => {
 }
 
 
+const seedPhotos = async () => {
+  try {
+
+    const photosFile = path.join(__dirname, '../data/photos.csv');
+    var bulkOps = [];
+
+    const photoStream = fs.createReadStream(photosFile)
+      .pipe(parse({
+        delimiter: ',',
+        columns: true,
+        relax_quotes: true,
+        relax_column_count: true
+      }))
+
+    for await (const row of photoStream) {
+      bulkOps.push({
+        updateOne: {
+          filter: { 'results.style_id': parseInt(row.styleId)},
+          update: {
+            $push: {
+              'results.$.photos': {
+                thumbnail_url: row.thumbnail_url,
+                url: row.url } } }
+        }
+      });
+
+      if (bulkOps.length === batchSize) {
+        await Style.bulkWrite(bulkOps);
+        console.log(`${bulkOps.length} photos embedded`);
+        bulkOps = [];
+      }
+    }
+
+    if (bulkOps.length > 0) {
+      await Style.bulkWrite(bulkOps);
+      console.log('* final photos embedded *');
+    }
+
+  } catch (err) {
+    console.error('photos seed failed', err);
+  }
+};
 
 
+const seedSkus = async () => {
+  try {
 
-// const seedPhotos = () => {
+    const skusFile = path.join(__dirname, '../data/skus.csv');
+    var bulkOps = [];
 
-//   return new Promise((resolve, reject) => {
-//     const photosFile = path.join(__dirname, '../data/photos.csv');
-//     var csvData = [];
-//     var batchSize = 10000;
-//     var count = 0;
+    const skuStream = fs.createReadStream(skusFile)
+      .pipe(parse({
+        delimiter: ',',
+        columns: true,
+        relax_quotes: true,
+        relax_column_count: true
+      }));
 
-//     const stream = fs.createReadStream(photosFile)
-//       .pipe(parse({
-//         delimiter: ',',
-//         columns: true,
-//         relax_quotes: true,
-//         relax_column_count: true
-//       }))
-//       .on('data', (row) => {
-//         csvData.push({
-//           id: parseInt(row.id),
-//           style_id: parseInt(row.styleId),
-//           thumbnail_url: row.thumbnail_url,
-//           url: row.url
-//         });
+    for await (const row of skuStream) {
+      bulkOps.push({
+        updateOne: {
+          filter: { 'results.style_id': parseInt(row.styleId) },
+          update: {
+            $set: {
+              [`results.$.skus.${row.id}`]: {
+                quantity: parseInt(row.quantity),
+                size: row.size} } }
+        }
+      });
 
-//         count++;
+      if (bulkOps.length === batchSize) {
+        await Style.bulkWrite(bulkOps);
+        console.log(`${bulkOps.length} skus embedded`);
+        bulkOps = [];
+      }
+    }
 
-//         if (csvData.length === batchSize) {
-//           stream.pause();
-//           Photo.insertMany(csvData)
-//             .then(() => {
-//               console.log(`${count} photos seeded`);
-//               csvData = [];
-//               stream.resume();
-//             })
-//             .catch((err) => {
-//               console.error('photo collection failed: ');
-//               reject(err);
-//             });
-//         }
-//       })
-//       .on('end', () => {
-//         if (csvData.length > 0) {
-//           Photo.insertMany(csvData)
-//             .then(() => {
-//               console.log('final photos seeded');
-//               resolve();
-//             })
-//             .catch((err) => {
-//               console.error('photo collection failed: ');
-//               reject(err);
-//             });
-//         } else {
-//           console.log('** mongodb finished updating photo collection **');
-//           resolve();
-//         }
+    if (bulkOps.length > 0) {
+      await Style.bulkWrite(bulkOps);
+      console.log('* final skus embedded *');
+    }
 
-//       })
-//       .on('error', (err) => {
-//         console.error('mongodb failed to update photo collection');
-//         reject(err);
-//       });
-//   });
-// };
+  } catch (err) {
+    console.error('skus seed failed', err);
+  }
+};
 
-// const seedSkus = () => {
 
-//   return new Promise((resolve, reject) => {
-//     const skusFile = path.join(__dirname, '../data/skus.csv');
-//     var csvData = [];
-//     var batchSize = 10000;
-//     var count = 0;
-
-//     const stream = fs.createReadStream(skusFile)
-//       .pipe(parse({
-//         delimiter: ',',
-//         columns: true,
-//         relax_quotes: true,
-//         relax_column_count: true
-//       }))
-//       .on('data', (row) => {
-//         csvData.push({
-//           id: parseInt(row.id),
-//           style_id: parseInt(row.styleId),
-//           quantity: row.quantity,
-//           size: row.size
-//         });
-
-//         count++;
-
-//         if (csvData.length === batchSize) {
-//           stream.pause();
-//           Sku.insertMany(csvData)
-//             .then(() => {
-//               console.log(`${count} skus seeded`);
-//               csvData = [];
-//               stream.resume();
-//             })
-//             .catch((err) => {
-//               console.error('sku collection failed: ');
-//               reject(err);
-//             });
-//         }
-//       })
-//       .on('end', () => {
-//         if (csvData.length > 0) {
-//           Sku.insertMany(csvData)
-//             .then(() => {
-//               console.log(`${count} skus seeded`);
-//               resolve();
-//             })
-//             .catch((err) => {
-//               console.error('sku collection failed: ');
-//               reject(err);
-//             });
-//         } else {
-//           console.log('mongodb finished updating sku collection');
-//           resolve();
-//         }
-//       })
-//       .on('error', (err) => {
-//         console.error('mongodb failed to update sku collection');
-//         reject(err);
-//       });
-//   });
-// };
-
-// const seedStyles = () => {
-
-//   return new Promise((resolve, reject) => {
-//     const skusFile = path.join(__dirname, '../data/styles.csv');
-//     var csvData = [];
-//     var batchSize = 10000;
-//     var count = 0;
-
-//     const stream = fs.createReadStream(skusFile)
-//       .pipe(parse({
-//         delimiter: ',',
-//         columns: true,
-//         relax_quotes: true,
-//         relax_column_count: true
-//       }))
-//       .on('data', (row) => {
-//         csvData.push({
-//           product_id: parseInt(row.productId),
-//           style_id: parseInt(row.id),
-//           name: row.name,
-//           original_price: row.original_price,
-//           sale_price: row.sale_price,
-//           default_style: row.default_style
-//         });
-
-//         count++;
-
-//         if (csvData.length === batchSize) {
-//           stream.pause();
-//           Style.insertMany(csvData)
-//             .then(() => {
-//               console.log(`${count} styles seeded`);
-//               csvData = [];
-//               stream.resume();
-//             })
-//             .catch((err) => {
-//               console.error('style collection failed: ');
-//               reject(err);
-//             });
-//         }
-//       })
-//       .on('end', () => {
-//         if (csvData.length > 0) {
-//           Style.insertMany(csvData)
-//             .then(() => {
-//               console.log('final styles seeded');
-//               resolve();
-//             })
-//             .catch((err) => {
-//               console.error('style collection failed: ');
-//               reject(err);
-//             });
-//         } else {
-//           console.log('** mongodb finished updating style collection **');
-//         }
-//       })
-//       .on('error', (err) => {
-//         console.error('mongodb failed to update style collection');
-//         reject(err);
-//       });
-//   });
-// };
 
 const seedCart = () => {
 
@@ -450,15 +358,15 @@ const runETL = async () => {
   try {
     console.log('seeding MongoDB...');
 
-    await Promise.all([
-      seedProduct(),
-      seedRelated(),
-      seedFeatures(),
-      seedPhotos(),
-      seedSkus(),
-      seedStyles(),
-      seedCart()
-    ]);
+    await seedProduct();
+    await seedRelated();
+    await seedFeatures();
+
+    await seedStyles();
+    await seedPhotos();
+    await seedSkus();
+    await seedCart();
+
     console.log('All seeding complete! Ending process...');
     process.exit(0);
   } catch (err) {
@@ -468,7 +376,5 @@ const runETL = async () => {
 };
 
 runETL();
-
-
 
 module.exports = { seedProduct, seedRelated, seedFeatures, seedPhotos, seedSkus, seedStyles, seedCart };
