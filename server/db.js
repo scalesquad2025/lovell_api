@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
+// deploy
 
 mongoose.connect(process.env.MONGODB_URI);
 mongoose.connection.on('error', (err) => console.error('mongoose failed: ', err));
