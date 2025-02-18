@@ -340,13 +340,11 @@ const runETL = async () => {
 
     console.log('seeding Products...');
     await seedProduct();
-    await seedRelated();
-    await seedFeatures();
+    await Promise.all([seedRelated(), seedFeatures()]);
 
     console.log('seeding Styles...')
     await seedStyles();
-    await seedPhotos();
-    await seedSkus();
+    await Promise.all([seedPhotos(), seedSkus()]);
 
     console.log('seeding Carts...');
     await seedCart();
