@@ -65,13 +65,16 @@ app.get('/products/:id/related', async (req, res) => {
 app.get('/cart', async (req, res) => {
   try {
     // TODO: implement authentication
+    res.status(200).json('Endpoint setup in process...');
   } catch (err) {
     console.error('cart fetch failed: ', err);
     return res.status(500);
   }
 });
 
-app.post('/cart');
+app.post('/cart', async (req, res) => {
+  res.status(200).json('Endpoint setup in process...');
+});
 
 app.listen(process.env.PORT); // 3000
 console.log(`Listening at http://localhost:${process.env.PORT}`);

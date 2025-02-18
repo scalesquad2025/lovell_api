@@ -11,37 +11,67 @@ const getProductView = async (page, count) => {
   })
   .skip((page - 1) * count)
   .limit(count)
+  .lean()
 };
 
 const getProduct = async (productId) => {
-  const product = await Product.findOne({id: productId});
+  const prod = await Product.findOne({id: productId}).lean();
 
-  return product.map(p => ({
-    id: p.id,
-    campus: p.campus,
-    name: p.name,
-    slogan: p.slogan,
-    description: p.description,
-    category: p.category,
-    default_price: p.default_price,
-    created_at: p.created_at,
-    updated_at: p.updated_at,
-    features: p.features
-  }));
+  return {
+    id: prod.id,
+    campus: prod.campus,
+    name: prod.name,
+    slogan: prod.slogan,
+    description: prod.description,
+    category: prod.category,
+    default_price: prod.default_price,
+    created_at: prod.created_at,
+    updated_at: prod.updated_at,
+    features: prod.features
+  };
 };
 
 const getStyles = async (productId) => {
-  return await Style.find({product_id: productId}, {
+  const styles = await Style.find({product_id: productId}, {
     _id: 0,
     __v: 0
+  }).lean();
+
+  const product_id = styles[0].product_id.toString();
+  const results = [];
+
+  styles.forEach((style) => {
+    style.results.forEach((result) => {
+      const skusObj = {};
+      Object.keys(result.skus).forEach((key) => {
+        skusObj[key] = {
+          quantity: result.skus[key].quantity,
+          size: result.skus[key].size
+        };
+      });
+
+      results.push({
+        style_id: result.style_id,
+        name: result.name,
+        original_price: result.original_price + '.00',
+        sale_price: result.sale_price === 'null' ? null : result.sale_price,
+        'default?': result.default_style,
+        photos: result.photos.map((photo) => ({
+          thumbnail_url: photo.thumbnail_url,
+          url: photo.url
+        })),
+        skus: skusObj
+      });
+    });
   });
+  return {product_id, results};
 };
 
 const getRelated = async (productId) => {
   return await Product.findOne({id: productId}, {
     related: 1,
     _id: 0
-  });
+  }).lean();
 };
 
 
@@ -60,10 +90,57 @@ module.exports = { getStyles, getProduct, getProductView, getRelated };
 // .limit(count)
 
 
-// db.styles.find({id: 40344}, {
-//   _id: 0,
-//   __v: 0
-// })
+// db.styles.aggregate([
+//   { $match: { product_id: 40344 } },
+//   {
+//     $lookup: {
+//       from: 'photos',
+//       localField: 'style_id',
+//       foreignField: 'style_id',
+//       as: 'photos'
+//     }
+//   },
+//   {
+//     $lookup: {
+//       from: 'skus',
+//       localField: 'style_id',
+//       foreignField: 'style_id',
+//       as: 'skus'
+//     }
+//   },
+//   {
+//     $addFields: {
+//       skus: {
+//         $arrayToObject: {
+//           $map: {
+//             input: '$skus',
+//             as: 'sku',
+//             in: {
+//               k: { $toString: '$$sku.sku_id' },
+//               v: { quantity: '$$sku.quantity', size: '$$sku.size' }
+//             }
+//           }
+//         }
+//       }
+//     }
+//   },
+//   {
+//     $group: {
+//       _id: '$product_id',
+//       product_id: { $first: '$product_id' },
+//       results: { $push: {
+//         style_id: '$style_id',
+//         name: '$name',
+//         original_price: '$original_price',
+//         sale_price: { $ifNull: ['$sale_price', null] },
+//         'default?': '$default_style',
+//         photos: '$photos',
+//         skus: { $ifNull: ['$skus', {}] }
+//       } }
+//     }
+//   },
+//   { $project: { _id: 0 } }
+// ]);
 
 
 // db.products.aggregate([
