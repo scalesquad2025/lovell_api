@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
-const { Feature, Related, Product, Photo, Sku, Style, Cart } = require('./db.js');
-// before refactor
+const { Product, Style, Cart } = require('./db.js');
 
 
 const getProductView = async (page = 1, count = 5) => {
-  return Product.find({}, {
+  return await Product.find({}, {
     _id: 0,
     __v: 0,
     features: 0,
@@ -15,10 +14,7 @@ const getProductView = async (page = 1, count = 5) => {
 };
 
 const getProduct = async (productId) => {
-  const product = Product.find({id: 40344}, {
-    _id: 0,
-    __v: 0
-  });
+  const product = await Product.findOne({id: productId});
 
   return product.map(p => ({
     id: p.id,
@@ -35,117 +31,39 @@ const getProduct = async (productId) => {
 };
 
 const getStyles = async (productId) => {
-  return Product.aggregate([
-    {
-      $match: { id: productId }
-    },
-    {
-      $lookup: {
-        from: "styles",
-        let: { productId: "$id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$product_id", "$$productId"] } } },
-          {
-            $lookup: {
-              from: "photos",
-              localField: "style_id",
-              foreignField: "style_id",
-              as: "photos"
-            }
-          },
-          {
-            $lookup: {
-              from: "skus",
-              localField: "style_id",
-              foreignField: "style_id",
-              as: "skus"
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              style_id: 1,
-              name: 1,
-              original_price: 1,
-              sale_price: 1,
-              default_style: 1,
-              photos: {
-                $map: {
-                  input: "$photos",
-                  as: "photo",
-                  in: {
-                    thumbnail_url: "$$photo.thumbnail_url",
-                    url: "$$photo.url"
-                  }
-                }
-              },
-              skus: {
-                $arrayToObject: {
-                  $map: {
-                    input: "$skus",
-                    as: "sku",
-                    in: [
-                      { $toString: "$$sku.id" },
-                      {
-                        quantity: "$$sku.quantity",
-                        size: "$$sku.size"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        ],
-        as: "styles"
-      }
-    },
-    {
-      $project: {
-        _id: 0,
-        product_id: { $toString: "$id" },
-        results: "$styles"
-      }
-    }
-  ]);
+  return await Style.find({product_id: productId}, {
+    _id: 0,
+    __v: 0
+  });
 };
 
 const getRelated = async (productId) => {
-  return Related.aggregate([
-    { $match: { product_id: productId } },
-    {
-      $group: {
-        _id: '$product_id',
-        related: { $push: "$related_product_id" }
-      }
-    },
-    {
-      $project: {
-        _id: 0,
-        related: 1
-      }
-    }
-  ]);
+  return await Product.findOne({id: productId}, {
+    related: 1,
+    _id: 0
+  });
 };
+
 
 module.exports = { getStyles, getProduct, getProductView, getRelated };
 
 
+// db.products.find({id: 40344}, {related: 1})
 
-Product.find({}, {
-  _id: 0,
-  __v: 0,
-  features: 0,
-  related: 0
-})
-.skip((page - 1) * count)
-.limit(count)
+// db.products.find({}, {
+//   _id: 0,
+//   __v: 0,
+//   features: 0,
+//   related: 0
+// })
+// .skip((page - 1) * count)
+// .limit(count)
 
 
-db.products.find({id: 40344}, {
-  _id: 0,
-  __v: 0
-})
+// db.styles.find({id: 40344}, {
+//   _id: 0,
+//   __v: 0
+// })
 
 
 // db.products.aggregate([
@@ -191,11 +109,6 @@ db.products.find({id: 40344}, {
 //     }
 //   }
 // ])
-
-
-
-
-
 
 
 // // 3

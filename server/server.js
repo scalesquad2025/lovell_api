@@ -42,7 +42,7 @@ app.get('/products/:id/styles', async (req, res) => {
 
     const styles = await getStyles(productId);
 
-    return res.status(200).json(styles[0]);
+    return res.status(200).json(styles);
   } catch (err) {
     console.error('styles fetch failed: ', err);
     return res.status(500);
@@ -55,7 +55,7 @@ app.get('/products/:id/related', async (req, res) => {
 
     const related = await getRelated(productId);
 
-    return res.status(200).json(related[0].related);
+    return res.status(200).json(related.related);
   } catch (err) {
     console.error('related fetch failed: ', err);
     return res.status(500);
