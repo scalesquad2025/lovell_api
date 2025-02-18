@@ -14,7 +14,7 @@ app.get('/products', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const count = parseInt(req.query.count) || 5;
 
-    const products = await getProductView();
+    const products = await getProductView(page, count);
 
     return res.status(200).json(products);
   } catch (err) {

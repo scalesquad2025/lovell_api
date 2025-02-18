@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Product, Style, Cart } = require('./db.js');
 
 
-const getProductView = async (page = 1, count = 5) => {
+const getProductView = async (page, count) => {
   return await Product.find({}, {
     _id: 0,
     __v: 0,
