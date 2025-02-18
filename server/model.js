@@ -3,49 +3,35 @@ const { Feature, Related, Product, Photo, Sku, Style, Cart } = require('./db.js'
 // before refactor
 
 
-const getProductView = async () => {
-  return Product.aggregate([
-    {
-      $limit: 5
-    },
-    {
-      $addFields: { campus: 'hr-rfp' }
-    },
-    {
-      $project: {
-        _id: 0,
-        __v: 0
-      }
-    }
-  ]);
+const getProductView = async (page = 1, count = 5) => {
+  return Product.find({}, {
+    _id: 0,
+    __v: 0,
+    features: 0,
+    related: 0
+  })
+  .skip((page - 1) * count)
+  .limit(count)
 };
 
 const getProduct = async (productId) => {
-  return Product.aggregate([
-        {
-          $match: {id: productId}
-        },
-        {
-        $lookup: {
-          from: 'features',
-          localField: 'id',
-          foreignField: 'product_id',
-          as: 'features'
-          }
-        },
-        {
-          $addFields: { campus: 'hr-rfp' }
-        },
-        {
-          $project: {
-            '_id': 0,
-            '__v': 0,
-            'features._id': 0,
-            'features.__v': 0,
-            'features.id': 0,
-            'features.product_id': 0}
-        }
-      ]);
+  const product = Product.find({id: 40344}, {
+    _id: 0,
+    __v: 0
+  });
+
+  return product.map(p => ({
+    id: p.id,
+    campus: p.campus,
+    name: p.name,
+    slogan: p.slogan,
+    description: p.description,
+    category: p.category,
+    default_price: p.default_price,
+    created_at: p.created_at,
+    updated_at: p.updated_at,
+    features: p.features
+  }));
 };
 
 const getStyles = async (productId) => {
@@ -145,6 +131,21 @@ const getRelated = async (productId) => {
 module.exports = { getStyles, getProduct, getProductView, getRelated };
 
 
+
+Product.find({}, {
+  _id: 0,
+  __v: 0,
+  features: 0,
+  related: 0
+})
+.skip((page - 1) * count)
+.limit(count)
+
+
+db.products.find({id: 40344}, {
+  _id: 0,
+  __v: 0
+})
 
 
 // db.products.aggregate([
