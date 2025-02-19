@@ -10,7 +10,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// /products?page=2&count=5
 app.get('/products', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -79,7 +78,7 @@ app.post('/cart', async (req, res) => {
 });
 
 app.listen(process.env.PORT); // 3000
-console.log(`Listening at http://localhost:${process.env.PORT}`);
+console.log(`Listening at http://54.160.237.234:${process.env.PORT}`);
 
 module.exports = app;
 
