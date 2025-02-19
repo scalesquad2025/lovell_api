@@ -11,7 +11,7 @@ export const options = {
 };
 
 export default function () {
-  let res = http.get('http://localhost:3000/products');
+  let res = http.get('http://54.160.237.234:3000/products/4034/styles');
   check(res, {
     'status is 200': (r) => r.status === 200
   });
