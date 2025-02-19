@@ -10,6 +10,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/loaderio-168a9700e107f67eb4e7572498834a5f.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'loaderio-168a9700e107f67eb4e7572498834a5f.txt'));
+});
+
 app.get('/products', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
