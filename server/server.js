@@ -1,12 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('path');
 const { getStyles, getProduct, getProductView, getRelated } = require('./model.js');
 // deploy
 
 const app = express();
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // /products?page=2&count=5
 app.get('/products', async (req, res) => {
