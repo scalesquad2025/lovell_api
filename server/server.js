@@ -8,7 +8,7 @@ const { getStyles, getProduct, getProductView, getRelated } = require('./model.j
 const app = express();
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'server/public')));
 
 app.get('/products', async (req, res) => {
   try {
