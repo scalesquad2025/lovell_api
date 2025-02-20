@@ -98,7 +98,7 @@ if (cluster.isMaster) {
   });
 
   app.listen(process.env.PORT); // 3000
-  console.log(`Worker process ${process.pid} listening at http://54.160.237.234:${process.env.PORT}`);
+  console.log(`Worker process ${process.pid} listening at port:${process.env.PORT}`);
 
   module.exports = app;
 
