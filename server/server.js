@@ -26,8 +26,8 @@ if (cluster.isMaster) {
   app.use(express.json());
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.get('/loaderio-168a9700e107f67eb4e7572498834a5f.txt', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'loaderio-168a9700e107f67eb4e7572498834a5f.txt'));
+  app.get('/loaderio-147ce59c94171d72bc74f919dd0878ac.txt', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'loaderio-147ce59c94171d72bc74f919dd0878ac.txt'));
   });
 
   app.get('/products', async (req, res) => {
