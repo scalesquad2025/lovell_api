@@ -23,7 +23,7 @@ This project is a high-performance e-commerce API designed to handle data fetche
 
 - After MongoDB refactor: **+3s -> milliseconds**
 - Single EC2: **1000 RPS, 191ms, 0.3% error rate**
-### Nginx + 2 EC2s: **1150 RPS, 9ms, 0% error rate**
+- Nginx + 2 EC2s: **1150 RPS, 9ms, 0% error rate**
 
 
 <ins>Tech Stack:</ins>
